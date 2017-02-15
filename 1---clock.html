@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>成功的路上并不拥挤，因为坚持的人不多</title>
+    <style>
+        canvas {
+            border: 1px solid #000;
+
+        }
+
+        div {
+
+            width: 1000px;
+            height: 600px;
+            margin: 0 auto;
+
+        }
+    </style>
+
+    <script>
+
+    </script>
+</head>
+<body>
+<div>
+    <canvas id="canvas" width="1000" height="600"></canvas>
+</div>
+
+<script>
+    function toAngle(radian) {
+        return 180 * radian / Math.PI;
+    }
+    function toRadian(angle) {
+        return angle * Math.PI / 180;
+    }
+
+    var canvas = document.getElementById('canvas');
+    var ctx = canvas.getContext('2d');
+
+    function clock() {
+        var w = canvas.width,
+                h = canvas.height;
+
+        ctx.clearRect(0, 0, w, h);
+
+        var rw = 316,
+                rh = 316;
+        cr = 40;
+        var x,
+            y;
+        ctx.save();
+
+        ctx.translate(w / 2, h / 2);
+        ctx.beginPath();
+        ctx.strokeStyle = "lightblue";
+        ctx.fillStyle = "lightblue";
+        ctx.moveTo(-rw / 2, -rh / 2 + cr);
+        ctx.arcTo(-rw / 2, rh / 2, rw / 2, rh / 2, cr);
+        ctx.arcTo(rw / 2, rh / 2, rw / 2, -rh / 2, cr);
+        ctx.arcTo(rw / 2, -rh / 2, -rw / 2, -rh / 2, cr);
+        ctx.arcTo(-rw / 2, -rh / 2, -rw / 2, -rh / 2 + cr, cr);
+        ctx.stroke();
+//       外轮廓是逆时针，圆是顺时针，根据非零环绕原则，来确定填充部分
+        ctx.arc(0, 0, 150, 0, 2 * Math.PI);
+        ctx.fill();
+
+//       绘制小时刻度
+        ctx.lineWidth = 6;
+        for (var i = 0; i < 12; i++) {
+            ctx.save();
+            ctx.strokeStyle = "pink";
+            ctx.rotate(i * Math.PI / 6);//旋转后坐标轴随之旋转
+            ctx.beginPath();
+            ctx.moveTo(150, 0);
+            ctx.lineTo(150 - 16, 0);
+            ctx.stroke();
+            ctx.restore();//将坐标轴恢复到最初未旋转的状态。x轴水平向右
+
+//           绘制文字
+
+//           文字不需要旋转，只需确定好文字的填充内容和起始位置即可
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.font = "16px Consolas";
+            ctx.beginPath();
+            ctx.fillText(i + 3 > 12 ? i + 3 - 12 : i + 3,
+                    (150 - 16 - 15) * Math.cos(i * Math.PI / 6),
+                    (150 - 16 - 15) * Math.sin(i * Math.PI / 6)
+            );
+
+        }
+
+//        绘制分/秒的刻度
+        ctx.save();
+        ctx.lineWidth = 4;
+        for (var j = 0; j < 60; j++) {
+//            除去整点时刻不绘制，其余都绘制
+            if (j % 5 !== 0) {
+                ctx.beginPath();
+                ctx.moveTo(150, 0);
+                ctx.lineTo(150 - 8, 0);
+                ctx.stroke();
+            }
+            ctx.rotate(Math.PI/30);
+//            不释放，是角度累加
+//            如果释放，就要*i,每次都以水平x轴为基准
+
+        }
+        ctx.restore();
+
+//不管坐标轴旋转没，原点仍未（0,0），所以释放不释放，对原点的渲染无影响
+        ctx.arc(0,0,5,0,2*Math.PI);
+        ctx.fill();
+
+//        绘制时分秒
+
+
+        var current=new Date();
+        var hour=current.getHours();
+        var minute=current.getMinutes();
+        var second=current.getSeconds();
+//        设置时分秒针的长度
+        var hourR=60,
+             minR=80,
+             secR=100;
+
+//        绘制时针
+        ctx.lineWidth=6;
+        ctx.save();
+//      此时坐标轴是从3开始的，获取到的小时1是对的，但显示在刻度盘上应从0/12开始
+        ctx.rotate(-Math.PI/2);
+        hour=hour>12?hour-12:hour;
+//      console.log(hour);//1
+
+        x=hourR*Math.cos((hour+minute/60+second/3600)*Math.PI/6);
+        y=hourR*Math.sin((hour+minute/60+second/3600)*Math.PI/6);
+
+        ctx.beginPath();
+        ctx.lineCap="round";
+        ctx.strokeStyle="lightgreen";
+        ctx.moveTo(0,0);
+        ctx.lineTo(x,y);
+        ctx.stroke();
+
+
+//        绘制分针
+
+        ctx.lineWidth=4;
+        x=minR*Math.cos((minute+second/60)*Math.PI/30);
+        y=minR*Math.sin((minute+second/60)*Math.PI/30);
+
+        ctx.beginPath();
+        ctx.lineCap="round";
+        ctx.strokeStyle="hotpink";
+        ctx.moveTo(0,0);
+        ctx.lineTo(x,y);
+        ctx.stroke();
+//        绘制秒针
+        ctx.lineWidth=2;
+        x=secR*Math.cos(second*Math.PI/30);
+        y=secR*Math.sin(second*Math.PI/30);
+
+        ctx.beginPath();
+        ctx.lineCap="round";
+        ctx.strokeStyle="lightblue";
+        ctx.moveTo(0,0);
+        ctx.lineTo(x,y);
+        ctx.stroke();
+        ctx.restore();
+        ctx.restore();
+
+        window.requestAnimationFrame(clock);
+
+    }
+
+    window.requestAnimationFrame(clock)
+
+    clock();
+</script>
+</body>
+</html>
